@@ -69,8 +69,8 @@ class Message(object):
         elif set(self.protocol_args + ([self.protocol_extended] if self.protocol_extended else [])) == set(kwargs.keys()):
             self.__setup_from_args(kwargs)
         else:
-            print 'stuff from message class', set(self.protocol_args + [self.protocol_extended] if self.protocol_extended else [])
-            print 'kwargs', set(kwargs.keys())
+            print('stuff from message class', set(self.protocol_args + [self.protocol_extended] if self.protocol_extended else []))
+            print('kwargs', set(kwargs.keys()))
             raise Exception("Bad init values")
 
     def __setup_from_bytestring(self, bytestring):
@@ -95,7 +95,7 @@ class Message(object):
         if isinstance(self, KeepAlive):
             self.msg_length = number_to_bytes(0)
         else:
-            self.msg_length = number_to_bytes(sum(len(x) for x in kwargs.values()) + 1)
+            self.msg_length = number_to_bytes(sum(len(x) for x in list(kwargs.values())) + 1)
 
     def __str__(self):
         s = ''

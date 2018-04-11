@@ -4,7 +4,7 @@ import os
 import sys
 
 def download_torrent(url):
-    print url
+    print(url)
     fname = os.getcwd() + '/' + url.split('title=')[-1] + '.torrent'
     # http://stackoverflow.com/a/14114741/1302018
     try:
@@ -16,7 +16,7 @@ def download_torrent(url):
         		f.flush()
         f.close()
     except requests.exceptions.RequestException as e:
-        print '\n' + str(e)
+        print('\n' + str(e))
         sys.exit(1)
 
     return fname
@@ -36,14 +36,14 @@ def main(s):
 	return href, title, size, seeders, leechers
 
 	for i in range(len(href)):
-		print str(i+1)+' '+title[i]+' '+size[i]+' '+seeders[i]+' '+leechers[i]
-		print ' '
-	choice=raw_input('ENTER NUMBER:')
+		print(str(i+1)+' '+title[i]+' '+size[i]+' '+seeders[i]+' '+leechers[i])
+		print(' ')
+	choice=input('ENTER NUMBER:')
 	#print a
 	fname=download_torrent(href[int(choice)-1])
-	print fname+'  DOWNLOADED'
+	print(fname+'  DOWNLOADED')
 		
 
 if __name__ == '__main__':
-	s=raw_input('SEARCH:')
+	s=input('SEARCH:')
 	main(str(s))

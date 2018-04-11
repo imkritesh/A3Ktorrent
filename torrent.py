@@ -14,7 +14,7 @@ class torrent(object):
 		self.announce_url=self.metainfo['announce']
 		if self.metainfo['announce-list']:
 			self.announce_list=self.metainfo['announce-list']
-			print self.announce_list
+			print(self.announce_list)
 		self.announce_url = self.announce_list[2][0]
 		self.info=self.metainfo['info']
 		self.sha_info=hashlib.sha1(bencode.bencode(self.info))
@@ -37,7 +37,7 @@ class torrent(object):
 		else:
 			self.folder_name="Your File is here"
 		self.piece_length=self.info['piece length']      #size in bytes
-		print 'packet-size:',self.piece_length
+		print('packet-size:',self.piece_length)
 		pieces_hash=self.info['pieces']
 		self.pieces_array=[]
 		while len(pieces_hash)>0:

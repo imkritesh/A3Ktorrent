@@ -25,7 +25,7 @@ class BittorrentProtocol(Protocol):
         return handshake
 
     def connectionMade(self):
-        print 'ConnecTionMade!'
+        print('ConnecTionMade!')
         handshake_msg = str(self.handshake(self.factory.active_torrent.torrent_info)) 
         #print 'handshake msg we are sending is->'+str(handshake_msg)
         #handshake object returned by self.handshake()!
@@ -50,7 +50,7 @@ class BittorrentProtocol(Protocol):
         else:
             self.message_buffer = bytearray(data)
         if self.message_buffer[1:20].lower() == "bittorrent protocol":
-            print "Handshake Received!"
+            print("Handshake Received!")
             self.decode_handshake(self.factory.active_torrent.torrent_info) #compare info-hash
             self.message_buffer = self.message_buffer[68:]
             messages_to_send_list.append(messages.Interested())     #we send interested when we receive handhake
@@ -81,10 +81,10 @@ class BittorrentProtocol(Protocol):
     def parse_messages(self, messages_to_send_list):
         message_obj = self.parse_message_from_response()
         if isinstance(message_obj, messages.Choke):
-            print 'messages.Choked'
+            print('messages.Choked')
             self.choked = True
         elif isinstance(message_obj, messages.Unchoke):
-            print 'messages.Unchoked!'
+            print('messages.Unchoked!')
             self.choked = False
             if self.interested:
                 for i in range(5):
@@ -106,7 +106,7 @@ class BittorrentProtocol(Protocol):
                 messages_to_send_list.append(self.get_next_request())
 
         elif isinstance(message_obj, messages.Request):
-            print 'request'
+            print('request')
             pass  #send piece
         elif isinstance(message_obj, messages.Piece):
             self.pending_requests -= 1
@@ -115,9 +115,9 @@ class BittorrentProtocol(Protocol):
             if self.interested and not self.choked:
                 messages_to_send_list.append(self.get_next_request())
         elif isinstance(message_obj, messages.Cancel):
-            print 'cancel'
+            print('cancel')
         elif isinstance(message_obj, messages.Port):
-            print 'port'
+            print('port')
             #parse port and switch connection to that port
         return messages_to_send_list
 
@@ -162,10 +162,10 @@ class BittorrentFactory(ClientFactory):
         self.active_torrent = active_torrent
 
     def startedConnecting(self,connector):
-        print 'Started to connect.'
+        print('Started to connect.')
 
     def buildProtocol(self,addr):  
-        print 'Connected.'
+        print('Connected.')
         protocol = BittorrentProtocol(self)
         self.protocols.append(protocol)
         return protocol

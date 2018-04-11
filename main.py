@@ -1,7 +1,7 @@
 
 from os import path, mkdir, remove, rename
 from bencode import *
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 from time import *
 from bitstring import BitArray
 from hashlib import sha1
@@ -16,13 +16,15 @@ import constants
 import sys
 from random import randrange
 import socket
-import urllib, urllib2
+import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 from blessings import Terminal
 term = Terminal()
 
-from gi.repository import Gtk, GObject, Notify
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, GObject#, Notify
 #from gi.repository import Gio
-import thread
+import _thread
 #import getpass #for username
 from multiprocessing.pool import ThreadPool 
 #sys.path.append(path.abspath("scraping"))
@@ -34,7 +36,7 @@ import scrape_test
 
 class UI(object):
     def __init__(self):
-        Notify.init("A3KTorrent")
+        # Notify.init("A3KTorrent")
         self.filename = 'path'
         self.filepath = 'folder'
         #default values to check!
@@ -71,6 +73,7 @@ class UI(object):
         #self.popup_menu = self.builder.get_object("menu5")
 
     def send_notification(self, title, text, file_path_to_icon=""):
+        return
         #TO make bubble notification-UBUNTU#
         n = Notify.Notification.new(title, text, file_path_to_icon)
         n.show()
@@ -80,7 +83,7 @@ class UI(object):
         self.window.show_all()
 
     def search(self,button):
-        print 'search clicked'
+        print('search clicked')
         self.popup_menu=Gtk.Menu()
         s=self.search_field.get_text()
         if s:
@@ -89,7 +92,7 @@ class UI(object):
             async_result = pool.apply_async(scrape_test.main, (s,)) # tuple of args for foo
             self.href, title, size, seeders, leechers= async_result.get() 
             self.popup_menu.set_title("Torrents")
-            print self.popup_menu.get_title()
+            print(self.popup_menu.get_title())
             for i in range(len(self.href)):
                 #print str(i+1)+'. '+title[i]+' '+size[i]+' '+seeders[i]+' '+leechers[i]
                 menu_item = Gtk.MenuItem(str(i+1)+'. '+title[i]+'     '+size[i]+' '+seeders[i]+'-SEEDERS '+leechers[i]+'-LEECHERS')
@@ -99,19 +102,19 @@ class UI(object):
             self.popup_menu.popup(None, None, None, None, 0, Gtk.get_current_event_time())
 
         else:
-            print 'EMPTY'
+            print('EMPTY')
             self.label.set_text("Search field is empty")
             #self.dialog=self.builder.get_object('dialog1')
             v=self.dialog.run()
             if v==1:
                 self.dialog.hide()
     def item_activated(self,wdg,i):
-        print 'ITEM ACTIVATED:'+str(i)
+        print('ITEM ACTIVATED:'+str(i))
         pool = ThreadPool(processes=1)
         async_result = pool.apply_async(scrape_test.download_torrent, (self.href[i],)) # tuple of args for foo
         torrent_file_path = async_result.get()
         #torrent_file_path = scrape_test.download_torrent(self.href[i])
-        print torrent_file_path
+        print(torrent_file_path)
         self.send_notification("MESSAGE","Torrent file Saved","gtk-apply")
         #self.label.set_text("Torrent file has been downloaded!:")
         v=self.dialog2.run()
@@ -128,23 +131,23 @@ class UI(object):
     def download(self,button): #when download button is pressed!
         #self.progressbar.set_fraction(0.7)
         
-        print "Download button pressed"
-        print 'FILENAME:',self.filename
+        print("Download button pressed")
+        print('FILENAME:',self.filename)
         a=self.filename.split('.')
         if self.filename == 'path' or a[len(a)-1]!='torrent':
-            print 'PATH'
-            print 'PLEASE ENTER A TORRENT FILE'
+            print('PATH')
+            print('PLEASE ENTER A TORRENT FILE')
             self.label.set_text("Please Select a Torrent File")
             response=self.dialog.run()
             #dialog.show_all()
-            print response
+            print(response)
             if response == 1:
-                print 'The OK button was clicked'
+                print('The OK button was clicked')
             elif response == 2:
-                print 'the cancel button was clicked'
+                print('the cancel button was clicked')
             self.dialog.hide()
         else:
-            print 'else'
+            print('else')
             #button.set_sensitive(False) # so that user can not press download button again!
             
             
@@ -155,18 +158,18 @@ class UI(object):
                 v=self.dialog3.run()
                 if v==1:
                     #PROCEED BUTTON HAS BEEN CLICKED!
-                    print self.filepath
+                    print(self.filepath)
                     if self.filepath == 'folder':
                         v==10
                         self.label.set_text("Please Select a Path to Download")
                         response=self.dialog.run()
-                        print response
+                        print(response)
                         if response == 1:
-                            print 'The OK button was clicked'
+                            print('The OK button was clicked')
                             self.dialog.hide()
                     else:
                         self.dialog3.hide()
-                        thread.start_new_thread(self.start_download,())
+                        _thread.start_new_thread(self.start_download,())
                         button.set_sensitive(False)
                         break
                 if v == 2:
@@ -185,18 +188,18 @@ class UI(object):
 
         writing_dir = self.filepath
         ###############################################
-        print writing_dir
+        print(writing_dir)
         torrent_list=[]
         torrent_list.append(self.filename)
-        print '*'*50
+        print('*'*50)
         #print sys.argv[1]
-        print torrent_list
+        print(torrent_list)
         active_torrent_list = []    
         for torrent in torrent_list:
-            print 'torrent: ' + torrent
+            print('torrent: ' + torrent)
             t = ActiveTorrent(self,torrent, writing_dir)
             t.connect()
-            print t.peers
+            print(t.peers)
             active_torrent_list.append(t)
             l_expired = task.LoopingCall(t.check_for_expired_requests)
             l_expired.start(constants.PENDING_TIMEOUT) #run every x seconds
@@ -212,7 +215,7 @@ class UI(object):
     def set_progressbar(self,percentage,download_speed):
         #print percentage
         #Gtk.main()
-        print percentage
+        print(percentage)
         self.progressbar.set_fraction(percentage)
         download_speed = round(download_speed,2)
         self.dow_label.set_text(str(download_speed)+'Kbps')
@@ -229,14 +232,14 @@ class UI(object):
             Gtk.main_quit()
 
     def filechoose(self,widget):
-        print 'filechoose'
+        print('filechoose')
         self.filename = widget.get_filename()
-        print 'FILENAME:',self.filename
+        print('FILENAME:',self.filename)
 
     def filechoose2(self,widget):
-        print 'filechoose2'
+        print('filechoose2')
         self.filepath = widget.get_filename()
-        print 'FILENAME2:',self.filepath
+        print('FILENAME2:',self.filepath)
 
 
 class ActiveTorrent(object):
@@ -247,7 +250,7 @@ class ActiveTorrent(object):
         self.peers = self.get_peers()
         self.file_downloading = TorrentFile(self.torrent_info.overall_length, self.torrent_info.piece_length)
         #print 'oye'
-        print 'no. of pieces',self.file_downloading.number_pieces
+        print('no. of pieces',self.file_downloading.number_pieces)
         self.pieces=0
         self.requested_blocks = self.bitarray_of_block_number()
         self.have_blocks = self.bitarray_of_block_number()
@@ -290,7 +293,7 @@ class ActiveTorrent(object):
         for peer in self.peers:
             if number_connections < constants.NUMBER_PEERS:
                 hostandport = peer.split(':')
-                print hostandport[0] + ':' + hostandport[1]
+                print(hostandport[0] + ':' + hostandport[1])
                 reactor.connectTCP(hostandport[0], int(hostandport[1]), self.factory)
                 number_connections += 1
 
@@ -321,7 +324,7 @@ class ActiveTorrent(object):
         return peer_list
 
     def get_peers(self):
-        print self.torrent_info.announce_url
+        print(self.torrent_info.announce_url)
         '''Input: metainfo file (.torrent file)
            Output: a list of peer_ids (strings) returned from the tracker
            Calls methods to send an http request to the tracker, parse the returned
@@ -331,17 +334,17 @@ class ActiveTorrent(object):
             url=self.torrent_info.announce_url
             self.track_url=url.split('//',1)[1].split(':',1)[0]
             self.track_port=url.split('//',1)[1].split(':',1)[1].split('/',1)[0]
-            print self.track_url
-            print self.track_port
-            print 'ITS UDP TRACKER'
+            print(self.track_url)
+            print(self.track_port)
+            print('ITS UDP TRACKER')
             result = self.udp_connection_request()
-            print result
+            print(result)
             return result
         else:
-            print 'HTTP'
+            print('HTTP')
             r = requests.get(self.torrent_info.announce_url, params=self.torrent_info.param_dict)
             peers = self.parse_response_from_tracker(r)
-            print peers
+            print(peers)
             return peers
 
     def udp_connection_request(self):
@@ -363,13 +366,13 @@ class ActiveTorrent(object):
 
        
         res = self.clisocket.recv(16)
-        print res
-        print 'NOW RECv'
+        print(res)
+        print('NOW RECv')
         parsed_res = unpack(">LLQ", res)
 
-        print parsed_res
+        print(parsed_res)
         if parsed_res[0] == 0 and parsed_res[1] == transaction_id:  #Check:transaction ID is equal to the one you chose nad action is connect (0).
-            print 'CORRECT RESPONSE FROM UDP'
+            print('CORRECT RESPONSE FROM UDP')
             peers = self.udp_announce_request(parsed_res)
             return peers
         else:
@@ -399,7 +402,7 @@ class ActiveTorrent(object):
         res = self.clisocket.recv(1024)
         #print len(res)
         action = unpack("!LL", res[:8])
-        print action
+        print(action)
         if action[0] == 1 and action[1] == transaction_id:
             index=20     #28
             peers=[]
@@ -434,7 +437,7 @@ class ActiveTorrent(object):
 
     def check_for_expired_requests(self):
         now = time()
-        pairs = [(k,v) for (k,v) in self.pending_timeout.iteritems()]
+        pairs = [(k,v) for (k,v) in self.pending_timeout.items()]
         for k,v in pairs:
             #if value more than x seconds before now, remove key and set pending_requests to 0 for key
             if (now - v) > constants.PENDING_TIMEOUT:
@@ -462,12 +465,12 @@ class ActiveTorrent(object):
     def check_if_done(self):
         #print 'Checking if complete'
         if all(self.have_blocks):
-            print '\nTorrent completely downloaded!\n'
+            print('\nTorrent completely downloaded!\n')
             self.tempfile.close()
             self.done = True
 
     def write_multiple_files(self, info):
-        print 'multiple files. creating files and folders.'
+        print('multiple files. creating files and folders.')
         f_read = open(self.temp_file_path,'rb')
         for element in info['files']:
             path_list = element['path']
@@ -492,7 +495,7 @@ class ActiveTorrent(object):
         if 'files' in info:
             self.write_multiple_files(info)
         else:
-            print 'single file. renaming'
+            print('single file. renaming')
             extension = self.torrent_info.folder_name.rsplit('.',1)[1]
             rename(self.temp_file_path, self.temp_file_path[:-4]+extension)  #just rename file with correct extension
 
@@ -510,22 +513,22 @@ class ActiveTorrent(object):
     def clear_data(self, piece, piece_num):
         #write piece's blocks to empty (do a debug if_full check to verify)
         #set have and requested blocks for piece to 0
-        print 'clear_data called because hashes did not match'
+        print('clear_data called because hashes did not match')
         for block_num, block in enumerate(piece.block_list):
             piece.write(block_num, '')
             block_num_overall = self.piece_and_index_to_overall_index(block_num, piece_num) 
             self.have_blocks[block_num_overall] = 0
             self.requested_blocks[block_num_overall] = 0
-        print 'after clearing, is the piece full? (should be False) ' + piece.check_if_full()
+        print('after clearing, is the piece full? (should be False) ' + piece.check_if_full())
 
     def check_hash(self, piece, piece_num):            #check piece hash when piece is fuly downloaded
         #print 'piece ' + str(piece_num) + ' is full!'
         
         self.time=time()-self.start_time #toal time
-        print 'TIME:'+str(self.time)
+        print('TIME:'+str(self.time))
         self.pieces+=1 #it holds no. of pieces downloaded
-        print 'no. of packets:'+str(self.pieces)
-        print 'PACKET SIZE:',self.torrent_info.piece_length
+        print('no. of packets:'+str(self.pieces))
+        print('PACKET SIZE:',self.torrent_info.piece_length)
         #print "DOWNLOAD SPEED:",
         download_speed=(float(self.torrent_info.piece_length)*.008*self.pieces)/(float(self.time))
         #,'Kbps'
@@ -541,8 +544,8 @@ class ActiveTorrent(object):
         #sys.stdout.write('\r DOWNLOADED->'+str(percentage)+'%'+'        DOWNLOAD-SPEED->'+str(downloaded))
         # sys.stdout.write('\r')
         # sys.stdout.write("[%-50s] %f%%" % ('='*int(percentage*50), percentage*100))
-        print ('\r'),
-        print (term.bright_red + term.on_black +"[%-50s] %f%%" % ('='*int(percentage*50), percentage*100)+term.normal),
+        print(('\r'), end=' ')
+        print((term.bright_red + term.on_black +"[%-50s] %f%%" % ('='*int(percentage*50), percentage*100)+term.normal), end=' ')
         #calculate percentage
         #print self.have_blocks
 
@@ -556,7 +559,7 @@ class ActiveTorrent(object):
             #print 'hashes matched, writing piece'
             self.write_piece(piece,piece_num)
         else:
-            print 'HASHES DID NOT MATCH'
+            print('HASHES DID NOT MATCH')
             self.clear_data(piece,piece_num)
         return percentage
 
@@ -595,14 +598,14 @@ class ActiveTorrent(object):
         for protocol in self.factory.protocols:
             now = time()
             if (now - protocol.message_timeout) > constants.KEEP_ALIVE_TIMEOUT:
-                print 'Keep Alive message sent'
+                print('Keep Alive message sent')
                 protocol.transport.write(str(KeepAlive()))
                 protocol.message_timeout = time()
 
 def check_for_done(active_torrents):
     #if all torrents finished
     if all([t.done for t in active_torrents]):
-        print 'All torrents finished downloading. Stopping reactor loop'
+        print('All torrents finished downloading. Stopping reactor loop')
         reactor.stop()
         #self.connector.disconnect()
         [t.write_all_files() for t in active_torrents]
@@ -618,6 +621,7 @@ def main():
         "search_clicked":ui.search
     }
     ui.connect(handlers)
+    print ("HANDLERS CONNECTED")
     val=ui.aboutdialog.run()
     # print val
     # x=4

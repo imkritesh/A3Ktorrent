@@ -15,32 +15,32 @@ def generate_peer_id():
  
 
 def main():
-	print 'KRITESH'
+	print('KRITESH')
 	f=open('book2.torrent','rb')
 	s=f.read()
 	data={}
 
-	print bencode.bdecode(f.read())
+	print(bencode.bdecode(f.read()))
 	data=bencode.bdecode(s)
-	print data
+	print(data)
 
-	print 'folder_name:',data['info']['name']
+	print('folder_name:',data['info']['name'])
 
 
 	announce=data['announce']
-	print announce
+	print(announce)
 		
 	info = data['info']
 	info_hash=hashlib.sha1(bencode.bencode(info)).digest()
-	print info_hash
+	print(info_hash)
 
 	port = 59696
 
 	length=data['info']['files'][0]['length']                #files ki ek list hai!
-	print length
+	print(length)
 
 	peer_id=generate_peer_id()
-	print peer_id
+	print(peer_id)
 
 
 	dicto = {'info_hash':info_hash, 'peer_id':generate_peer_id(), 'port':port,
@@ -54,13 +54,13 @@ def main():
 	#xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	response=bencode.bdecode(r.content)
 	
-	print response
-	print '--------------------------'
+	print(response)
+	print('--------------------------')
 	peers = response['peers']
         peer_address = ''
         peer_list = []
         for i,c in enumerate(peers):
-        	print i,':',ord(c)              #ord gives ascii value of character
+        	print(i,':',ord(c))              #ord gives ascii value of character
         	if i%6 == 4:
         		port_large = ord(c)*256
         	elif i%6 == 5:
@@ -72,7 +72,7 @@ def main():
         		peer_address += str(ord(c))
         	else:
         		peer_address += str(ord(c))+'.'
-	print peer_list
+	print(peer_list)
 	peer_list2=[]
 	peer_address=''
 	for i,c in enumerate(peers):
@@ -88,13 +88,13 @@ def main():
 		else:
 			peer_address+=str(ord(c))+'.'
 
-	print peer_list2
+	print(peer_list2)
 	d={}
 	d['info_hash']=info_hash
 	f=requests.get('http://tracker.mininova.org/scrap',params=d)
 	#print f.content
-	print dicto
-	print bencode.bdecode(f.content)
+	print(dicto)
+	print(bencode.bdecode(f.content))
 
 	for peer in peer_list:
 		hostandport=peer.split(':')
